@@ -59,9 +59,9 @@ etc.
 
 ### Using kmer count files
 
-Format of files should be a space delimited file with two columns containing 
-the kmer in the first and the count in the second. The files can be also be
-gzipped.
+Files should have two space-delimited columns containing the kmer in the first
+and the count in the second. The files need to be sorted (on the kmer column)
+and can be also be gzipped.
 
 ```
 % ls *.kmers.txt
