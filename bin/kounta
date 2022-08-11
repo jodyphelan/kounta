@@ -41,7 +41,8 @@ sub main {
     threads => { type=>'int', default=>1, need=>1, desc=>"Threads to use" },
     ram => { type=>'int', default=>4, need=>1, desc=>"RAM in gigabytes to use" },
     minfreq => { type=>'int', default=>3, need=>1, desc=>"Min k-mer frequency (FASTQ only)" },
-    tempdir => { type=>'string', default=>'auto', desc=>"Fast working directory" }
+    tempdir => { type=>'string', default=>'auto', desc=>"Fast working directory" },
+    counts => { type=>'bool', default=>0, desc=>"Input files are counted and sorted kmer lists" }
 #    binary => { type=>'', desc=>"Output binary presence/absence instead of counts" },
   });
 
@@ -84,20 +85,33 @@ sub main {
   for my $path (@seqfile) {
     my $file = basename($path);
     push @prefix, $file;
+    unless ($$opt{counts}) {
+      msg("Counting k-mers in $path");
+      my $fmt = $file =~ m/\.f(ast)?q/ ? "-fq -ci".$$opt{minfreq} : "-fm -ci1";
+      my $kmc = sprintf "kmc -cs65535 -m%d -sm -k%d -t%d $fmt $path $dir/$file $dir 1>/dev/null",
+                  $$opt{ram}, $$opt{kmer}, $$opt{threads};
+      run_cmd($kmc);
+      
+      msg("Sorting k-mers in $file");    
+      # https://github.com/refresh-bio/KMC/issues/131
+      # my $dump = "kmc_dump $dir/$file /dev/stdout | $sort -k1,1d > $dir/$file.kmers";
+      my $dump = "kmc_tools transform $dir/$file dump -s $dir/$file.kmers";
+      run_cmd($dump);
+      unlink "$dir/$file.kmc_suf";
+      unlink "$dir/$file.kmc_pre";
+    }
+    else {
+      if ($file =~ m/\.gz/) {
+        msg("Unzipping kmers");
+        my $cmd = "pigz -dc $file | $sort -k1,1d > $dir/$file.kmers";
+        run_cmd($cmd);
+      } else {
+        msg("Linking kmers");
+        my $cmd = "ln -sr $file $dir/$file.kmers";
+        run_cmd($cmd);
+      }
+    }
     
-    msg("Counting k-mers in $path");
-    my $fmt = $file =~ m/\.f(ast)?q/ ? "-fq -ci".$$opt{minfreq} : "-fm -ci1";
-    my $kmc = sprintf "kmc -cs65535 -m%d -sm -k%d -t%d $fmt $path $dir/$file $dir 1>/dev/null",
-                $$opt{ram}, $$opt{kmer}, $$opt{threads};
-    run_cmd($kmc);
-    
-    msg("Sorting k-mers in $file");    
-    # https://github.com/refresh-bio/KMC/issues/131
-    # my $dump = "kmc_dump $dir/$file /dev/stdout | $sort -k1,1d > $dir/$file.kmers";
-    my $dump = "kmc_tools transform $dir/$file dump -s $dir/$file.kmers";
-    run_cmd($dump);
-    unlink "$dir/$file.kmc_suf";
-    unlink "$dir/$file.kmc_pre";
     run_cmd("head -n 5 $dir/$file.kmers");
   }
 
