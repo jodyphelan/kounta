@@ -126,6 +126,7 @@ $HOME/kounta/bin/kounta --help
 
 * `perl` >= 5.26
 * `kmc` >= 3.1
+* `pigz` >= 2.4
 * GNU `parallel` >= 20160101
 * GNU `sort`, `paste`, `join`, `cut`, `uniq`, `wc`
 
