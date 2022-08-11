@@ -57,6 +57,33 @@ AAAAATA            0          91          76           0
 etc.
 ```
 
+### Using kmer count files
+
+Format of files should be a space delimited file with two columns containing 
+the kmer in the first and the count in the second. The files can be also be
+gzipped.
+
+```
+% ls *.kmers.txt
+SRR8651554.kmers.txt SRR8651555.kmers.txt SRR8651556.kmers.txt
+
+% kounta --counts 1 --out kmers.tsv *.kmers.txt
+<snip>
+Done.
+
+% head kmers.tsv
+#KMER	SRR8651554.kmers.txt	SRR8651555.kmers.txt	SRR8651556.kmers.txt
+AAAAAAAAAAAACTTTTTTAAAAATATTTCA	0	0	1
+AAAAAAAAAAACTTTTTTAAAAATATTTCAG	0	0	1
+AAAAAAAAAAACTTTTTTTAATGATACGGCG	1	0	0
+AAAAAAAAAACTTTTTTAAAAATATTTCAGC	0	0	1
+AAAAAAAAAACTTTTTTTAATGATACGGCGA	1	0	0
+AAAAAAAAACTTTTTTAAAAATATTTCAGCT	0	0	1
+AAAAAAAAACTTTTTTTAATGATACGGCGAC	1	0	0
+AAAAAAAAAGTAGGGAACAGCGGGTGAGAGA	0	0	1
+AAAAAAAACCGACTTTAGAAATATCAACAGC	0	0	1
+```
+
 ## Notes
 
 * Do not mix samples of reads and contigs, because the k-mer frequencies
