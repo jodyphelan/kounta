@@ -58,13 +58,13 @@ sub main {
     msg("Option: --$name = $value");
   }
 
-  require_exe($_) for qw(sort join paste uniq wc grep parallel kmc kmc_tools);
+  require_exe($_) for qw(sort join paste uniq wc grep parallel kmc kmc_tools pigz);
 #  return if $opt->{check};
 
   system("sort --help | grep 'parallel=' > /dev/null")
     and err("Only GNU sort is supported, you probably have MacOS/BSD sort.");
 
-  $$opt{ARGV} or err("Please provide some contig or read files");
+  $$opt{ARGV} or err("Please provide some contig, read or count files");
   my @seqfile = $opt->{ARGV}->@*;
   map { -r $_ or err("Can't read input file '$_'") } @seqfile;
 
@@ -103,11 +103,11 @@ sub main {
     else {
       if ($file =~ m/\.gz/) {
         msg("Unzipping kmers");
-        my $cmd = "pigz -p $$opt{threads} -dc $file > $dir/$file.kmers";
+        my $cmd = "pigz -p $$opt{threads} -dc $path > $dir/$file.kmers";
         run_cmd($cmd);
       } else {
         msg("Linking kmers");
-        my $cmd = "ln -sr $file $dir/$file.kmers";
+        my $cmd = "ln -sr $path $dir/$file.kmers";
         run_cmd($cmd);
       }
     }
