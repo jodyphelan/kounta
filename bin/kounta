@@ -103,7 +103,7 @@ sub main {
     else {
       if ($file =~ m/\.gz/) {
         msg("Unzipping kmers");
-        my $cmd = "pigz -dc $file | $sort -k1,1d > $dir/$file.kmers";
+        my $cmd = "pigz -dc $file > $dir/$file.kmers";
         run_cmd($cmd);
       } else {
         msg("Linking kmers");
